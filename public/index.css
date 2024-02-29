@@ -1,0 +1,36 @@
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    margin: 0;
+  }
+
+#root{
+    
+}
+
+header {
+    display: flex;
+    position: relative;
+    background-color: blanchedalmond;
+    max-height: 7%;
+    justify-content:space-around;
+    padding: 1% 5% 1% 5%;
+    
+   
+}
+
+header form{
+    display: inline-flex;
+    justify-self:stretch;
+    min-width: 40%;
+}
+
+header form input[type='text']{
+    min-width: 80%;
+}
+
+
+header img {
+    object-fit: cover;
+    height: 40px;
+  
+}
