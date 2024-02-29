@@ -9,62 +9,88 @@ rootElement.appendChild(mainElement);
 
 const config = {
     header: {
-        buttons: {
-            create: {
-                href: '/create',
-                inner: 'Разместить объявление',
-                render: renderCreate
+        logo: {
+            tagName: 'img',
+            name: 'logo',
+            src: 'https://grizly.club/uploads/posts/2023-02/1676327498_grizly-club-p-kartinki-klipart-yula-16.jpg',
+            render: renderMain,
+        },
+        categories: {
+            tagName: 'button',
+            name: 'categories',
+            href: '/categories',
+            innerHTML: 'Разместить объявление',
+            render: renderDefault,
+        },
+        search: {
+            tagName: 'form',
+            searchField: {
+                tagName: 'input',
+                type: 'text',
             },
-            login: {
-                href: '/login',
-                inner: 'Войти',
-                render: renderLogin
-            },
-            signup: {
-                href: '/signup',
-                inner: 'Зарегистрироваться',
-                render: renderSignup,
+            searchButton: {
+                tagName: 'input',
+                type: 'submit',
+                value: 'Найти',
             }
+        },
+        create: {
+            tagName: 'button',
+            name: 'create',
+            href: '/create',
+            innerHTML: 'Разместить объявление',
+            render: renderDefault,
+        },
+        login: {
+            tagName: 'button',
+            name: 'login',
+            href: '/login',
+            innerHTML: 'Войти',
+            render: renderLogin,
+        },
+        signup: {
+            tagName: 'button',
+            name: 'signup',
+            href: '/signup',
+            innerHTML: 'Зарегистрироваться',
+            render: renderSignup,
         }
+    
+    }
+}
+
+/**
+ * Функция, разворачивающая элементы HTML на страницу из конфига
+ * @param {HTMLElement} parent Родительский элеент, куда помещаются элементы
+ * @param {object} config Конфиг с описанием элементов HTML
+ */
+function makeTree(parent, config) {
+    for (const child in config) {
+        const element = document.createElement(config[child].tagName);
+
+        for (const property in config[child]) {
+
+            if (
+                typeof property != 'object' &&
+                property != "tagName"
+                ){
+                element[property] = config[child][property];
+                continue
+            }
+
+            makeTree(element, config[child]);
+        }
+
+        parent.appendChild(element)
+
+        element.addEventListener('click', (ev) => {
+            goToPage(element)
+        });
     }
 }
 
 function renderHeader(){
-    const logo = document.createElement('img');
-    logo.src = 'https://grizly.club/uploads/posts/2023-02/1676327498_grizly-club-p-kartinki-klipart-yula-16.jpg';
-
-    const categoriesButton = document.createElement('button');
-    categoriesButton.innerHTML = 'Категории';
-
-    const searchForm = document.createElement('form');
-    const inputSearch = document.createElement('input');
-    inputSearch.type = 'text';
-    const submitButton = document.createElement('input');
-    submitButton.type = 'submit';
-    submitButton.value = 'Найти'
-
-    headerElement.appendChild(logo)
-    headerElement.appendChild(categoriesButton)
-    headerElement.appendChild(searchForm)
-    searchForm.appendChild(inputSearch)
-    searchForm.appendChild(submitButton)
-
-    Object
-        .entries(config.header.buttons)
-        .forEach(([key, {href, inner}], index) => {
-            const button = document.createElement('button');
-            // button.href = href;
-            button.innerHTML= inner;
-            button.dataset.section = key;
-
-            headerElement.appendChild(button);
-
-            button.addEventListener('click', (ev) => {
-                goToPage(button)
-            });
-
-        })
-    ;
+    makeTree(headerElement, config.header)
 }
 
 function ajax(method, url, body = null, callback) {
@@ -87,18 +113,20 @@ function ajax(method, url, body = null, callback) {
     xhr.send(); 
   }
 
-function goToPage(button) {
+function goToPage(element) {
     mainElement.innerHTML = '';
   
-    const element = config.header.buttons[button.dataset.section].render();
+    const render = config.header[element.name]?.render();
   
-    mainElement.appendChild(element);
+    if (typeof render != 'undefined') {
+        mainElement.appendChild(render);
+    }
   }
 
-function renderCreate(){
+function renderDefault(){
     const element = document.createElement('div');
 
-    element.innerHTML = "страница размещения объявления";
+    element.innerHTML = "страница пока не добавлена";
 
     return element;
 }
@@ -151,8 +179,8 @@ function renderMain(){
           }
     )
 
-    return element
+    return element;
 }
 
-renderHeader()
-mainElement.appendChild(renderMain())
+renderHeader();
+mainElement.appendChild(renderMain());
