@@ -4,7 +4,7 @@ body {
   }
 
 #root{
-    
+    font-size: medium;
 }
 
 header {
@@ -14,8 +14,21 @@ header {
     max-height: 7%;
     justify-content:space-around;
     padding: 1% 5% 1% 5%;
-    
-   
+}
+
+main {
+    display: flex;
+    position: relative;
+    max-height: 7%;
+    align-items: center;
+    justify-content:space-around;
+    padding: 1% 5% 1% 5%;
+}
+
+main form input{
+    display:block;
+    font-size: large;
+    margin: 5%;
 }
 
 header form{
@@ -27,7 +40,6 @@ header form{
 header form input[type='text']{
     min-width: 80%;
 }
-
 
 header img {
     object-fit: cover;

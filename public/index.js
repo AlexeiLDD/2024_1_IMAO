@@ -12,7 +12,7 @@ const config = {
         logo: {
             tagName: 'img',
             name: 'logo',
-            src: 'https://grizly.club/uploads/posts/2023-02/1676327498_grizly-club-p-kartinki-klipart-yula-16.jpg',
+            src: '/1676327498_grizly-club-p-kartinki-klipart-yula-16.jpg',
             render: renderMain,
         },
         categories: {
@@ -56,7 +56,31 @@ const config = {
             render: renderSignup,
         }
     
-    }
+    },
+    login: {
+        loginLabel:{
+            tagName: 'h2',
+            innerHTML: 'Авторизация',
+        },
+        userName: {
+            tagName: 'input',
+            type: 'text',
+            placeholder: 'Имя пользователя',
+            name: 'userName',
+        },
+        password: {
+            tagName: 'input',
+            type: 'password',
+            placeholder: 'Пароль',
+            name: 'password',
+        },
+        loginButton: {
+            tagName: 'input',
+            type: 'submit',
+            value: 'Войти',
+            name: 'loginButton',
+        },
+    },
 }
 
 /**
@@ -84,7 +108,8 @@ function makeTree(parent, config) {
         parent.appendChild(element)
 
         element.addEventListener('click', (ev) => {
-            goToPage(element)
+           
+            goToPage(element, config)
         });
     }
 }
@@ -113,10 +138,8 @@ function ajax(method, url, body = null, callback) {
     xhr.send(); 
   }
 
-function goToPage(element) {
-    mainElement.innerHTML = '';
-  
-    const render = config.header[element.name]?.render();
+function goToPage(element, config) {
+    const render = config[element.name]?.render?.();
   
     if (typeof render != 'undefined') {
         mainElement.appendChild(render);
@@ -124,6 +147,7 @@ function goToPage(element) {
   }
 
 function renderDefault(){
+    mainElement.innerHTML = '';
     const element = document.createElement('div');
 
     element.innerHTML = "страница пока не добавлена";
@@ -132,14 +156,40 @@ function renderDefault(){
 }
 
 function renderLogin(){
-    const element = document.createElement('div');
+    mainElement.innerHTML = '';
+    const form = document.createElement('form');
 
-    element.innerHTML = "страница авторизации";
+    makeTree(form, config.login)
 
-    return element;
+    form.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+    
+        const inputs = form.getElementsByTagName('input');
+        const username = inputs[0].value.trim();
+        const password = inputs[1].value;
+
+        console.log(username);
+        console.log(password);
+    
+        ajax(
+          'POST',
+          '/login',
+            {password, username},
+            (status) => {
+                if(status === 200) {
+                  alert('Успешная авторизация!');
+                  return;
+                }
+                alert('НЕВЕРНЫЙ ЕМЕЙЛ ИЛИ ПАРОЛЬ');
+            }
+        );
+      })
+    
+      return form;
 }
 
 function renderSignup(){
+    mainElement.innerHTML = '';
     const element = document.createElement('div');
 
     element.innerHTML = "страница регистрации";
@@ -148,6 +198,8 @@ function renderSignup(){
 }
 
 function renderMain(){
+    mainElement.innerHTML = '';
+
     const element = document.createElement('div');
 
     element.innerHTML = "страница размещения объявления";
