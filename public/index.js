@@ -1,5 +1,23 @@
 'use strict';
 
+import { Ajax } from "./modules/ajax.js";
+import { MakeTree } from "./modules/makeTree.js";
+import { CONFIG_HEADER, initHeaderConf} from "./components/header.js";
+import { CONFIG_LOGIN } from "./components/login.js";
+
+const make = new MakeTree();
+const ajax = new Ajax();
+
+initHeaderConf(
+    CONFIG_HEADER,
+    {
+        renderDefault, 
+        renderLogin, 
+        renderSignup, 
+        renderMain,
+    },
+);
+
 const rootElement = document.getElementById('root');
 const headerElement = document.createElement('header');
 const mainElement = document.createElement('main');
@@ -7,136 +25,11 @@ const mainElement = document.createElement('main');
 rootElement.appendChild(headerElement);
 rootElement.appendChild(mainElement);
 
-const config = {
-    header: {
-        logo: {
-            tagName: 'img',
-            name: 'logo',
-            src: '/1676327498_grizly-club-p-kartinki-klipart-yula-16.jpg',
-            render: renderMain,
-        },
-        categories: {
-            tagName: 'button',
-            name: 'categories',
-            href: '/categories',
-            innerHTML: 'Разместить объявление',
-            render: renderDefault,
-        },
-        search: {
-            tagName: 'form',
-            searchField: {
-                tagName: 'input',
-                type: 'text',
-            },
-            searchButton: {
-                tagName: 'input',
-                type: 'submit',
-                value: 'Найти',
-            }
-        },
-        create: {
-            tagName: 'button',
-            name: 'create',
-            href: '/create',
-            innerHTML: 'Разместить объявление',
-            render: renderDefault,
-        },
-        login: {
-            tagName: 'button',
-            name: 'login',
-            href: '/login',
-            innerHTML: 'Войти',
-            render: renderLogin,
-        },
-        signup: {
-            tagName: 'button',
-            name: 'signup',
-            href: '/signup',
-            innerHTML: 'Зарегистрироваться',
-            render: renderSignup,
-        }
-    
-    },
-    login: {
-        loginLabel:{
-            tagName: 'h2',
-            innerHTML: 'Авторизация',
-        },
-        userName: {
-            tagName: 'input',
-            type: 'text',
-            placeholder: 'Имя пользователя',
-            name: 'userName',
-        },
-        password: {
-            tagName: 'input',
-            type: 'password',
-            placeholder: 'Пароль',
-            name: 'password',
-        },
-        loginButton: {
-            tagName: 'input',
-            type: 'submit',
-            value: 'Войти',
-            name: 'loginButton',
-        },
-    },
+const ROUTES = {
+    main: '/main',
+    login: '/login',
+    signup: '/signup',
 }
-
-/**
- * Функция, разворачивающая элементы HTML на страницу из конфига
- * @param {HTMLElement} parent Родительский элеент, куда помещаются элементы
- * @param {object} config Конфиг с описанием элементов HTML
- */
-function makeTree(parent, config) {
-    for (const child in config) {
-        const element = document.createElement(config[child].tagName);
-
-        for (const property in config[child]) {
-
-            if (
-                typeof property != 'object' &&
-                property != "tagName"
-                ){
-                element[property] = config[child][property];
-                continue
-            }
-
-            makeTree(element, config[child]);
-        }
-
-        parent.appendChild(element)
-
-        element.addEventListener('click', (ev) => {
-           
-            goToPage(element, config)
-        });
-    }
-}
-
-function renderHeader(){
-    makeTree(headerElement, config.header)
-}
-
-function ajax(method, url, body = null, callback) {
-    const xhr = new XMLHttpRequest();
-    xhr.open(method, url, true);
-    xhr.withCredentials = true;
-  
-    xhr.addEventListener('readystatechange', function () {
-      if (xhr.readyState !== XMLHttpRequest.DONE) return;
-  
-      callback(xhr.status, xhr.responseText);
-    });
-  
-    if (body) {
-      xhr.setRequestHeader('Content-type', 'application/json; charset=utf8');
-      xhr.send(JSON.stringify(body));
-      return;
-    }
-  
-    xhr.send(); 
-  }
 
 function goToPage(element, config) {
     const render = config[element.name]?.render?.();
@@ -145,6 +38,10 @@ function goToPage(element, config) {
         mainElement.appendChild(render);
     }
   }
+
+function renderHeader(){
+    make.makeTree(headerElement, goToPage, CONFIG_HEADER)
+}
 
 function renderDefault(){
     mainElement.innerHTML = '';
@@ -159,7 +56,7 @@ function renderLogin(){
     mainElement.innerHTML = '';
     const form = document.createElement('form');
 
-    makeTree(form, config.login)
+    make.makeTree(form, goToPage, CONFIG_LOGIN)
 
     form.addEventListener('submit', (ev) => {
         ev.preventDefault();
@@ -171,9 +68,8 @@ function renderLogin(){
         console.log(username);
         console.log(password);
     
-        ajax(
-          'POST',
-          '/login',
+        ajax.post(
+            ROUTES.login,
             {password, username},
             (status) => {
                 if(status === 200) {
@@ -204,10 +100,8 @@ function renderMain(){
 
     element.innerHTML = "страница размещения объявления";
 
-    ajax(
-        'GET',
-        '/main',
-        null,
+    ajax.get(
+        ROUTES.main,
         (status, responseString) => {
             let Success = status === 200;
     
@@ -228,7 +122,7 @@ function renderMain(){
                 div.innerHTML += inner;
               });
             }
-          }
+        }
     )
 
     return element;
