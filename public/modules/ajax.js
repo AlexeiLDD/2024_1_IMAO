@@ -1,43 +1,50 @@
 'use strict'
 
+
 export class Ajax{
 
+	#outerApi = 'http://127.0.0.1:8080';
+	#get = 'GET';
+	#post = 'POST';
+
     post(url, body, callback){
-        var  method = 'POST';
-        this._ajax({
-            method,
-            url,
-            body,
-            callback,
-        })
+       	const init = {
+			method: this.#post,
+			headers: { 'Content-type': 'application/json'},
+			mode: "cors",
+			credentials: 'same-origin',
+			body: JSON.stringify(body),
+		}
+
+		this.#ajax(this.#fullAdress(url), callback, init);
     }
 
     get(url, callback){
-        var  method = 'GET';
-        this._ajax({
-            method,
-            url,
-            callback,
-        })
+        const init = {
+			method: this.#get,
+			mode: "cors",
+			credentials: 'same-origin',
+		}
+		
+		this.#ajax(this.#fullAdress(url), callback, init);
     }
 
-    _ajax({method, url, body = null, callback}) {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, url, true);
-        xhr.withCredentials = true;
-      
-        xhr.addEventListener('readystatechange', function () {
-          if (xhr.readyState !== XMLHttpRequest.DONE) return;
-      
-          callback(xhr.status, xhr.responseText);
-        });
-      
-        if (body) {
-          xhr.setRequestHeader('Content-type', 'application/json; charset=utf8');
-          xhr.send(JSON.stringify(body));
-          return;
-        }
-      
-        xhr.send(); 
-      }
+	#fullAdress(route){
+		return(this.#outerApi + route);
+	}
+
+    #ajax(url, callback, init) {
+        fetch(url, init)
+			.then(response => {
+				console.log(response);
+				if(response.ok){
+					return response.json()
+				} else {
+					console.log(`${response.status} ERROR: ${response.statusText}`)
+				}
+			})
+			.then(data => callback(data)) 
+			.catch(err => alert(err));
+    
+    }
 }

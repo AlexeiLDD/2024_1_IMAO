@@ -52,7 +52,7 @@ app.post('/login',  (req, res) => {
     const id = uuid();
     ids[id] = username;
 
-    res.cookie('session', id, {expires: new Date(Date.now() + 1000 * 60 * 10)});
+    res.cookie('session_id', id, {expires: new Date(Date.now() + 1000 * 60 * 10)});
     res.status(200).json({id});
 });
 

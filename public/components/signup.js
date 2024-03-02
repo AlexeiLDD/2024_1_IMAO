@@ -1,9 +1,9 @@
 'use strict'
 
-export const CONFIG_LOGIN = {
+export const CONFIG_SIGNUP = {
     loginLabel:{
         tagName: 'h2',
-        innerHTML: 'Авторизация',
+        innerHTML: 'Регистрация',
     },
     email: {
         tagName: 'input',
@@ -16,6 +16,12 @@ export const CONFIG_LOGIN = {
         type: 'password',
         placeholder: 'Пароль',
         name: 'password',
+    },
+    repeatPassword: {
+        tagName: 'input',
+        type: 'password',
+        placeholder: 'Пароль',
+        name: 'repeatPassword',
     },
     loginButton: {
         tagName: 'input',

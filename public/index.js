@@ -4,9 +4,16 @@ import { Ajax } from "./modules/ajax.js";
 import { MakeTree } from "./modules/makeTree.js";
 import { CONFIG_HEADER, initHeaderConf} from "./components/header.js";
 import { CONFIG_LOGIN } from "./components/login.js";
+import { CONFIG_SIGNUP } from "./components/signup.js";
 
 const make = new MakeTree();
 const ajax = new Ajax();
+
+const ROUTES = {
+    main: '/main',
+    login: '/login',
+    signup: '/signup',
+}
 
 initHeaderConf(
     CONFIG_HEADER,
@@ -25,11 +32,7 @@ const mainElement = document.createElement('main');
 rootElement.appendChild(headerElement);
 rootElement.appendChild(mainElement);
 
-const ROUTES = {
-    main: '/main',
-    login: '/login',
-    signup: '/signup',
-}
+
 
 function goToPage(element, config) {
     const render = config[element.name]?.render?.();
@@ -62,18 +65,17 @@ function renderLogin(){
         ev.preventDefault();
     
         const inputs = form.getElementsByTagName('input');
-        const username = inputs[0].value.trim();
+        const email = inputs[0].value.trim();
         const password = inputs[1].value;
 
-        console.log(username);
-        console.log(password);
-    
         ajax.post(
             ROUTES.login,
-            {password, username},
-            (status) => {
-                if(status === 200) {
+            {email, password},
+            (body) => {
+                console.log(body);
+                if(body?.session_id) {
                   alert('Успешная авторизация!');
+                  mainElement.appendChild(renderMain());
                   return;
                 }
                 alert('НЕВЕРНЫЙ ЕМЕЙЛ ИЛИ ПАРОЛЬ');
@@ -86,11 +88,34 @@ function renderLogin(){
 
 function renderSignup(){
     mainElement.innerHTML = '';
-    const element = document.createElement('div');
+    const form = document.createElement('form');
 
-    element.innerHTML = "страница регистрации";
+    make.makeTree(form, goToPage, CONFIG_SIGNUP)
 
-    return element;
+    form.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+    
+        const inputs = form.getElementsByTagName('input');
+        const email = inputs[0].value.trim();
+        const password = inputs[1].value;
+        const password_repeat = inputs[2].value;
+
+        ajax.post(
+            ROUTES.signup,
+            {email, password, password_repeat},
+            (body) => {
+                console.log(body);
+                if(body?.session_id) {
+                  alert('Успешная регистрация!');
+                  mainElement.appendChild(renderMain());
+                  return;
+                }
+                alert('НЕВЕРНЫЙ ЕМЕЙЛ ИЛИ ПАРОЛЬ');
+            }
+        );
+      })
+    
+      return form;
 }
 
 function renderMain(){
@@ -102,17 +127,7 @@ function renderMain(){
 
     ajax.get(
         ROUTES.main,
-        (status, responseString) => {
-            let Success = status === 200;
-    
-            if (!Success) {
-              alert('Нет авторизации!');
-              goToPage(state.menuElements.login);
-              return;
-            }
-    
-            const ads = JSON.parse(responseString);
-    
+        (ads) => {
             if (ads && Array.isArray(ads)) {
               const div = document.createElement('div');
               element.appendChild(div);
